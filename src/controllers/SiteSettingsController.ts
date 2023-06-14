@@ -29,13 +29,13 @@ export const CreateSiteSettings = async (
         optionValue: filePath,
         createdById: user.id,
       };
-      const transformedObject = Object.entries(req.body).map(
-        ([key, value]) => ({
+      const transformedObject = Object.entries(req.body)
+        .filter(([key]) => key !== "tag")
+        .map(([key, value]) => ({
           optionName: key,
           optionValue: value,
           createdById: user.id,
-        })
-      );
+        }));
 
       const options: any[] = [...transformedObject, siteLogo];
       const optionsWithNewOption = options.filter(
@@ -51,11 +51,13 @@ export const CreateSiteSettings = async (
             },
             update: {
               optionValue: data.optionValue,
+              tag: req.body.tag,
               updatedById: data.createdById,
             },
             create: {
               optionName: data.optionName,
               optionValue: data.optionValue,
+              tag: req.body.tag,
               createdById: data.createdById,
             },
           });
