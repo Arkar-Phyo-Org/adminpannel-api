@@ -1,3 +1,4 @@
+import { SiteSettingsRouter } from "./routers/SiteSettingsRouter";
 import multer, { FileFilterCallback } from "multer";
 import cors from "cors";
 import express from "express";
@@ -57,7 +58,11 @@ const filter: any = (_req: Request, file: any, cb: FileFilterCallback) => {
     cb(null, false);
   }
 };
-app.use(multer({ storage: storage, fileFilter: filter }).fields([])); // 2
+app.use(
+  multer({ storage: storage, fileFilter: filter }).fields([
+    { name: "siteLogo" },
+  ])
+); // 2
 
 app.listen(SERVER_PORT, () => {
   console.log(`Server is running at http://${SERVER_DOMAIN}:${SERVER_PORT}`);
@@ -65,4 +70,5 @@ app.listen(SERVER_PORT, () => {
   // API ROUTES
   app.use("/api/auth", AuthRouter);
   app.use("/api/user", UserRouter);
+  app.use("/api/siteSettings", SiteSettingsRouter);
 });

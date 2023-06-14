@@ -11,26 +11,28 @@ datasource db {
 }
 
 model User {
-  id                String    @id @unique @default(uuid())
-  name              String
-  email             String
-  password          String
-  passwordOption    String
-  passwordReset     Int
-  phoneNumber       String?
-  role              UserType  @default(manager)
-  userStatus        Int       @default(0) // 0 = new user, freshly created and not sign-in yet, 1 = user signed-in
-  mailStatus        Int       @default(0) // 0 = not-sent, 1 = sent
-  accountStatus     Int       @default(0) // track user account for 0 = pending, 1 = accepted, 2 = active, 4 = Inactive, 5 = Bann
-  accountStatusTime DateTime? // track user account login time
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  createdById       String?
-  createdBy         User?     @relation("UserCreation", fields: [createdById], references: [id])
-  beenCreated       User[]    @relation("UserCreation")
-  updatedById       String?
-  updatedBy         User?     @relation("UserUpdate", fields: [updatedById], references: [id])
-  beenUpdated       User[]    @relation("UserUpdate")
+  id                      String         @id @unique @default(uuid())
+  name                    String
+  email                   String
+  password                String
+  passwordOption          String
+  passwordReset           Int
+  phoneNumber             String?
+  role                    UserType       @default(manager)
+  userStatus              Int            @default(0) // 0 = new user, freshly created and not sign-in yet, 1 = user signed-in
+  mailStatus              Int            @default(0) // 0 = not-sent, 1 = sent
+  accountStatus           Int            @default(0) // track user account for 0 = pending, 1 = accepted, 2 = active, 4 = Inactive, 5 = Bann
+  accountStatusTime       DateTime? // track user account login time
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+  createdById             String?
+  createdBy               User?          @relation("UserCreation", fields: [createdById], references: [id])
+  beenCreated             User[]         @relation("UserCreation")
+  updatedById             String?
+  updatedBy               User?          @relation("UserUpdate", fields: [updatedById], references: [id])
+  beenUpdated             User[]         @relation("UserUpdate")
+  siteSettingsBeenCreated SiteSettings[] @relation("SiteSettingsCreation")
+  siteSettingsBeenUpdated SiteSettings[] @relation("SiteSettingsUpdate")
 }
 
 enum UserType {
@@ -80,4 +82,17 @@ model RolePermission {
   permissionId String
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+}
+
+model SiteSettings {
+  id          String   @id @unique @default(uuid())
+  optionName  String   @unique
+  optionValue String   @db.LongText
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy   User?   @relation("SiteSettingsCreation", fields: [createdById], references: [id], onDelete: Cascade)
+  updatedById String?
+  updatedBy   User?   @relation("SiteSettingsUpdate", fields: [updatedById], references: [id], onDelete: Cascade)
 }
