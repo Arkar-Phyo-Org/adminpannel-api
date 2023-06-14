@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @unique @default(uuid())
+  name              String
+  email             String
+  password          String
+  passwordOption    String
+  passwordReset     Int
+  phoneNumber       String?
+  role              UserType  @default(manager)
+  userStatus        Int       @default(0) // 0 = new user, freshly created and not sign-in yet, 1 = user signed-in
+  mailStatus        Int       @default(0) // 0 = not-sent, 1 = sent
+  accountStatus     Int       @default(0) // track user account for 0 = pending, 1 = accepted, 2 = active, 4 = Inactive, 5 = Bann
+  accountStatusTime DateTime? // track user account login time
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  createdById       String?
+  createdBy         User?     @relation("UserCreation", fields: [createdById], references: [id])
+  beenCreated       User[]    @relation("UserCreation")
+  updatedById       String?
+  updatedBy         User?     @relation("UserUpdate", fields: [updatedById], references: [id])
+  beenUpdated       User[]    @relation("UserUpdate")
+}
+
+enum UserType {
+  super_admin
+  manager
+  normal
+}
+
+model Profile {
+  id String @id @unique @default(uuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Role {
+  id          String   @id @unique @default(uuid())
+  name        String
+  slug        String
+  description String
+  active      Int
+  context     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String   @id @unique @default(uuid())
+  name        String
+  slug        String
+  description String
+  active      Int
+  context     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  id           String     @id @unique @default(uuid())
+  role         Role       @relation(fields: [roleId], references: [id])
+  roleId       String
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  permissionId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
