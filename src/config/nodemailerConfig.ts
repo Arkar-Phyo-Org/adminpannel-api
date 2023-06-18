@@ -2,6 +2,13 @@ import nodemailer from "nodemailer";
 import { MailInterface } from "../lib/interfaces/mailInterface";
 import Logging from "../lib/Logging";
 import prisma from "../lib/prisma";
+import {
+  SMTP_HOST,
+  SMTP_PASSWORD,
+  SMTP_SENDER,
+  SMTP_TLS,
+  SMTP_USERNAME,
+} from ".";
 
 export const sendEmail = async (options: MailInterface) => {
   try {
@@ -14,38 +21,38 @@ export const sendEmail = async (options: MailInterface) => {
         optionValue: true,
       },
     });
-    if (smtpData) {
-      const assign: Record<string, string> = {};
-      smtpData.forEach(({ optionName, optionValue }) => {
-        assign[optionName] = optionValue;
-      });
-      const transporter = nodemailer.createTransport({
-        host: assign.host,
-        port: Number(assign.port),
-        secure: Boolean(assign.tls),
-        auth: {
-          user: assign.username,
-          pass: assign.password,
-        },
-      });
-      const mailOptions = {
-        from: `"Arkar Phyo | Pos System" ${assign.sender || options.from}`,
-        to: options.to,
-        cc: options.cc,
-        bcc: options.bcc,
-        subject: options.subject,
-        text: options.text,
-        html: options.html,
-      };
-      const res = await transporter.sendMail(mailOptions);
-      if (res) {
-        Logging.info(`Mail sent successfully!!`);
-        Logging.info(
-          `[MailResponse]=${res.response} [MessageID]=${res.messageId}`
-        );
-      }
-      return res;
+    const assign: Record<string, string> = {};
+    smtpData.forEach(({ optionName, optionValue }) => {
+      assign[optionName] = optionValue;
+    });
+    const transporter = nodemailer.createTransport({
+      host: smtpData.length ? assign.host : SMTP_HOST,
+      port: smtpData.length ? Number(assign.port) : Number(SMTP_HOST),
+      secure: smtpData.length ? Boolean(assign.tls) : Boolean(SMTP_TLS),
+      auth: {
+        user: smtpData.length ? assign.username : SMTP_USERNAME,
+        pass: smtpData.length ? assign.password : SMTP_PASSWORD,
+      },
+    });
+    const mailOptions = {
+      from: `${smtpData.length ? "Arkar Phyo | Pos System" : "Pos System"} ${
+        smtpData.length ? assign.sender : SMTP_SENDER || options.from
+      }`,
+      to: options.to,
+      cc: options.cc,
+      bcc: options.bcc,
+      subject: options.subject,
+      text: options.text,
+      html: options.html,
+    };
+    const res = await transporter.sendMail(mailOptions);
+    if (res) {
+      Logging.info(`Mail sent successfully!!`);
+      Logging.info(
+        `[MailResponse]=${res.response} [MessageID]=${res.messageId}`
+      );
     }
+    return res;
   } catch (error) {
     Logging.error(error);
   }

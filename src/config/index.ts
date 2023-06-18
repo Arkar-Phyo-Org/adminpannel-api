@@ -18,3 +18,4 @@ export const SMTP_PORT: any = process.env.SMTP_PORT;
 export const SMTP_USERNAME: string = process.env.SMTP_USERNAME || "any";
 export const SMTP_PASSWORD: string = process.env.SMTP_PASSWORD || "any";
 export const SMTP_SENDER: string = process.env.SMTP_SENDER || "any";
+export const SMTP_TLS: boolean = Boolean(process.env.SMTP_TLS) || false;
